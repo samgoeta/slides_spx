@@ -1,4 +1,4 @@
-name: Ninja Presentation
+name: Slides Datactivist
 description: >
-  Create a presentation using the xaringan package based on remark.js.
+  Créer des slides avec le template de Datactivist
 create_dir: false

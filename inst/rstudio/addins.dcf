@@ -1,5 +1,4 @@
-Name: Infinite Moon Reader
-Description: Run xaringan::infinite_moon_reader() to live preview slides or any
-    single-HTML-file R Markdown output.
+Name: Slides Datactivist
+Description: Lance slides_datactivist::infinite_moon_reader() pour prévisualiser les slides.
 Binding: inf_mr
 Interactive: true

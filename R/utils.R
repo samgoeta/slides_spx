@@ -3,7 +3,7 @@
 #' @importFrom xfun read_utf8 write_utf8 normalize_path
 
 pkg_resource = function(...) system.file(
-  'rmarkdown', 'templates', 'xaringan', 'resources', ..., package = 'xaringan',
+  'rmarkdown', 'templates', 'xaringan', 'resources', ..., package = 'SlidesDatactivist',
   mustWork = TRUE
 )
 
