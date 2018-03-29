@@ -18,7 +18,7 @@ params:
 layout: true
   
 
-`r paste0("<div class='my-footer'><span>", params$event, "</span> <center><div class=logo><img src='", system.file('rmarkdown', 'templates', 'xaringan', 'resources', 'img', 'fond_noir_monochrome.png', package='SlidesDatactivist'), "' width='100px'></center></span></div>")` 
+`r paste0("<div class='my-footer'><span>", params$event, "</span> <center><div class=logo><img src='https://github.com/datactivist/slides_datactivist/raw/master/inst/rmarkdown/templates/xaringan/resources/img/fond_noir_monochrome.png' width='100px'></center></span></div>")` 
 
 ---
 
