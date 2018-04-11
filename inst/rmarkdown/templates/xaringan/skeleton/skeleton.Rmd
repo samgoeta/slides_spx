@@ -35,8 +35,7 @@ Les productions de Datactivist sont librement réutilisables selon les termes de
 <BR>
 <BR>
 
-![](https://github.com/datactivist/slides_datactivist/raw/master/inst/rmarkdown/templates/xaringan/resources/img/by-sa.svg)
-
+![](https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-sa.png)
 
 
 ---
