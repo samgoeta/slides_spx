@@ -25,9 +25,9 @@ layout: true
 
 class: center, middle
 
-Ces slides en ligne : `r paste0("http://datactivist.coop/openbelgium/", params$slug)`
+Ces slides en ligne : `r paste0("http://datactivist.coop/", params$slug)`
 
-Sources : `r paste0("https://github.com/datactivist/openbelgium", params$slug)`
+Sources : `r paste0("https://github.com/datactivist/", params$slug)`
 
 
 Les productions de Datactivist sont librement réutilisables selon les termes de la licence [Creative Commons 4.0 BY-SA](https://creativecommons.org/licenses/by-sa/4.0/legalcode.fr).
@@ -35,7 +35,7 @@ Les productions de Datactivist sont librement réutilisables selon les termes de
 <BR>
 <BR>
 
-![](./img/by-sa.svg)
+![](https://github.com/datactivist/slides_datactivist/raw/master/inst/rmarkdown/templates/xaringan/resources/img/by-sa.svg)
 
 
 
@@ -44,7 +44,7 @@ Les productions de Datactivist sont librement réutilisables selon les termes de
 
 <BR><BR><BR><BR>
 
-[![](./img/logo.png)](https://datactivist.coop)
+[![](https://github.com/datactivist/slides_datactivist/raw/master/inst/rmarkdown/templates/xaringan/resources/img/logo.png)](https://datactivist.coop)
 
 ### We .red[open data], we make them .red[useful]
 
