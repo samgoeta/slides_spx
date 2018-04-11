@@ -13,6 +13,7 @@ output:
       countIncrementalSlides: false
 params:
   event: la grosse conférence
+  slug: lagrosseconf
 ---
 
 layout: true
@@ -24,9 +25,9 @@ layout: true
 
 class: center, middle
 
-Ces slides en ligne : http://datactivist.coop/openbelgium/
+Ces slides en ligne : `r paste0("http://datactivist.coop/openbelgium/", params$slug)`
 
-Sources : https://github.com/datactivist/openbelgium
+Sources : `r paste0("https://github.com/datactivist/openbelgium", params$slug)`
 
 
 Les productions de Datactivist sont librement réutilisables selon les termes de la licence [Creative Commons 4.0 BY-SA](https://creativecommons.org/licenses/by-sa/4.0/legalcode.fr).
@@ -46,6 +47,12 @@ Les productions de Datactivist sont librement réutilisables selon les termes de
 [![](./img/logo.png)](https://datactivist.coop)
 
 ### We .red[open data], we make them .red[useful]
+
+---
+## Qui sommes nous ?
+
+
+![](https://www.dropbox.com/s/kicm8kmqal303yc/equipe.jpg?dl=1)
 
 ---
 ## Qui sommes nous ?
