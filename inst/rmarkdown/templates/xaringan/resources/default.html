@@ -23,7 +23,7 @@ $endfor$
     <textarea id="source">
 $if(title-slide)$
 $if(title)$
-class: center, middle, inverse, title-slide
+class: $title-slide-class$
 
 # $title$
 $if(subtitle)$
@@ -48,13 +48,36 @@ $for(include-after)$
 $include-after$
 $endfor$
 
-$if(mathjax-url)$
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  tex2jax: {
-    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
   }
-});
+})();
+</script>
+
+$if(mathjax-url)$
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$$/.test(text) || /^\\\[(.|\s)+\\\]$$/.test(text) ||
+          /^\$$\$$(.|\s)+\$$\$$$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
 </script>
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

@@ -71,63 +71,8 @@ sample2 = function(x, size, ...) {
   } else sample(x, size, ...)
 }
 
-# filter out the lines between ``` ``` (there could be four or more backticks)
-prose_index = function(x) {
-  idx = NULL; r = '^(\\s*```*).*'; s = ''
-  for (i in grep(r, x)) {
-    if (s == '') {
-      s = gsub(r, '\\1', x[i]); idx = c(idx, i); next
-    }
-    # look for the next line with the same amount of backticks (end of block)
-    if (grepl(paste0('^', s), x[i])) {
-      idx = c(idx, i); s = ''
-    }
-  }
-  xi = seq_along(x); n = length(idx)
-  if (n == 0) return(xi)
-  if (n %% 2 != 0) {
-    # treat all lines as prose
-    warning('Code fences are not balanced'); return(xi)
-  }
-  idx2 = matrix(idx, nrow = 2)
-  idx2 = unlist(mapply(seq, idx2[1, ], idx2[2, ], SIMPLIFY = FALSE))
-  xi[-idx2]
-}
-
-protect_math = function(x) {
-  i = prose_index(x)
-  if (length(i)) x[i] = escape_math(x[i])
-  x
-}
-
-escape_math = function(x) {
-  # replace $x$ with `\(x\)` (protect inline math in <code></code>)
-  m = gregexpr('(?<=^|[\\s])[$](?! )[^$]+?(?<! )[$](?![$0123456789])', x, perl = TRUE)
-  regmatches(x, m) = lapply(regmatches(x, m), function(z) {
-    if (length(z) == 0) return(z)
-    z = sub('^[$]', '`\\\\(', z)
-    z = sub('[$]$', '\\\\)`', z)
-    z
-  })
-  # replace $$x$$ with `$$x$$` (protect display math)
-  m = gregexpr('(?<=^|[\\s])[$][$](?! )[^$]+?(?<! )[$][$]', x, perl = TRUE)
-  regmatches(x, m) = lapply(regmatches(x, m), function(z) {
-    if (length(z) == 0) return(z)
-    paste0('`', z, '`')
-  })
-  # if a line start or end with $$, treat it as math under some conditions
-  i = !grepl('^[$].+[$]$', x)
-  if (any(i)) {
-    x[i] = gsub('^([$][$])([^ ]+)', '`\\1\\2', x[i], perl = TRUE)
-    x[i] = gsub('([^ ])([$][$])$', '\\1\\2`', x[i], perl = TRUE)
-  }
-  # equation environments
-  i = grep('^\\\\begin\\{[^}]+\\}$', x)
-  x[i] = paste0('`', x[i])
-  i = grep('^\\\\end\\{[^}]+\\}$', x)
-  x[i] = paste0(x[i], '`')
-  x
-}
+prose_index = function(...) xfun::prose_index(...)
+protect_math = function(...) xfun::protect_math(...)
 
 #' Summon remark.js to your local disk
 #'
@@ -166,6 +111,13 @@ highlight_code = function(x) {
   paste(x, collapse = '\n')
 }
 
+highlight_output = function(x, options) {
+  if (is.null(i <- options$highlight.output) || xfun::isFALSE(i)) return(x)
+  x = split_lines(x)
+  x[i] = paste0('*', x[i])
+  paste(x, collapse = '\n')
+}
+
 # make sure blank lines and trailing \n are not removed by strsplit()
 split_lines = function(x) {
   unlist(strsplit(paste0(x, '\n'), '\n'))
@@ -176,3 +128,64 @@ file_content = function(file) {
 }
 
 pkg_file = function(file) file_content(pkg_resource(file))
+
+open_file = function(path){
+  if (xfun::is_windows()) {
+    shell.exec(path)
+  } else {
+    system2(if (xfun::is_macos()) 'open' else 'xdg-open', shQuote(path))
+  }
+}
+
+# does the current dir look like an R package dir?
+is_package = function() {
+  all(c(file.exists(c('DESCRIPTION', 'NAMESPACE')), dir.exists(c('R', 'inst'))))
+}
+
+# obtain the context of Rmd for xaringan slides
+slide_context = function(ctx = rstudioapi::getSourceEditorContext()) {
+  x = ctx$contents
+  if (length(x) < 3 || length(s <- which(x == '---')) < 2 || s[1] != 1) return()
+  if (length(grep(' xaringan::.+', x[1:s[2]])) == 0) return()
+  l = ctx$selection[[1]]$range$end[1]  # line number of cursor
+  i = prose_index(x, warn = FALSE); x2 = x; if (length(i)) x2[-i] = ''
+  s = grep('^---?$', x2)  # line numbers of slide separators; first two are YAML
+  i = which(x2 == '---')
+  n = max(sum(s <= l), 1)
+  i1 = tail(i[i <= l], 1); if (length(i1) == 0) i1 = 1
+  i2 = s[n + 1]; if (is.na(i2)) i2 = length(x)
+  txt = x[i1:i2]; i = grep('^---?$', txt)
+  if (length(i)) txt = txt[-i]
+  o = getOption('xaringan.page_number.offset', 0L)
+  # total # of pages; current page #; Markdown content of current page
+  list(
+    N = as.integer(length(s) + o), n = n + o, c = if (i1 > 1) txt
+  )
+}
+
+slide_navigate = function(ctx = rstudioapi::getSourceEditorContext(), message, target) {
+  if (!is.list(message) || !is.numeric(p <- message$n)) return()
+  sel = ctx$selection[[1]]
+  if (sel$text != '') return()  # when user has selected some text, don't navigate
+  l = sel$range$end[1]; x = ctx$contents
+  i = prose_index(x, warn = FALSE); x2 = x; if (length(i)) x2[-i] = ''
+  s = grep('^---?$', x2); o = getOption('xaringan.page_number.offset', 0L)
+  if (length(s) + o != message$N) return()
+  n = max(sum(s <= l), 1); p = p - o
+  # don't move cursor if already on the current page
+  if (n != p && p <= length(s))
+    rstudioapi::setCursorPosition(rstudioapi::document_position(s[p] + 1, 1))
+}
+
+flatten_chunk = function(x) {
+  if (length(i <- grep(knitr::all_patterns$md$chunk.begin, x)) == 0) return(x)
+  k = grepl('\\W(echo|include)\\s*=\\s*FALSE\\W', x[i])
+  x[i][!k] = gsub('\\{.+', '', x[i][!k])
+  x[i][k]  = gsub('\\{.+', '.hidden', x[i][k])
+  x
+}
+
+process_slide = function(x) {
+  x = protect_math(flatten_chunk(x))
+  paste(x, collapse = '\n')
+}

@@ -2,7 +2,7 @@
 title: "Réussir sa politique d'open data"
 subtitle: "Quelques retours d'expérience"
 author: "Joël Gombin, Datactivist"
-date: "OpenBelgium, 12 mars 2018"
+date: "OpenDataConf, `r Sys.Date()`"
 output:
   SlidesDatactivist::moon_reader:
     css: [default, datactivist, datactivist-fonts]
@@ -42,7 +42,6 @@ Les productions de Datactivist sont librement réutilisables selon les termes de
 ---
 ## Qui sommes nous ?
 
-<BR><BR><BR><BR>
 
 [![](https://github.com/datactivist/slides_datactivist/raw/master/inst/rmarkdown/templates/xaringan/resources/img/logo.png)](https://datactivist.coop)
 
@@ -99,7 +98,6 @@ Mais c'est difficile : demande peu visible, pas de possibilité de soumettre la 
 ---
 ## Ouvrir ses données : les étapes
 
-![](./img/etapes.png)
 
 ???
 

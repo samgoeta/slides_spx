@@ -41,7 +41,10 @@
 #'   \code{autoplay} milliseconds. You can also set \code{countdown} to a number
 #'   (the number of milliseconds) to include a countdown timer on each slide. If
 #'   using \code{autoplay}, you can optionally set \code{countdown} to
-#'   \code{TRUE} to include a countdown equal to \code{autoplay}.
+#'   \code{TRUE} to include a countdown equal to \code{autoplay}. To alter the
+#'   set of classes applied to the title slide, you can optionally set
+#'   \code{titleSlideClass} to a vector of classes; the default is
+#'   \code{c("center", "middle", "inverse")}.
 #' @param ... For \code{tsukuyomi()}, arguments passed to \code{moon_reader()};
 #'   for \code{moon_reader()}, arguments passed to
 #'   \code{rmarkdown::\link{html_document}()}.
@@ -79,6 +82,7 @@ moon_reader = function(
   }
   tmp_js = tempfile('xaringan', fileext = '.js')  # write JS config to this file
   tmp_md = tempfile('xaringan', fileext = '.md')  # store md content here (bypass Pandoc)
+  options(xaringan.page_number.offset = if (seal) 0L else -1L)
 
   play_js = if (is.numeric(autoplay <- nature[['autoplay']]) && autoplay > 0)
     sprintf('setInterval(function() {slideshow.gotoNextSlide();}, %d);', autoplay)
@@ -88,10 +92,15 @@ moon_reader = function(
     '(%s)(%d);', pkg_file('js/countdown.js'), countdown
   )
 
+  if (is.null(title_cls <- nature[['titleSlideClass']]))
+    title_cls = c('center', 'middle', 'inverse')
+  title_cls = paste(c(title_cls, 'title-slide'), collapse = ', ')
+
   before = nature[['beforeInit']]
-  nature[['countdown']] = nature[['autoplay']] = nature[['beforeInit']] = NULL
+  for (i in c('countdown', 'autoplay', 'beforeInit', 'titleSlideClass')) nature[[i]] = NULL
 
   write_utf8(as.character(tagList(
+    tags$style(`data-target` = 'print-only', '@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}'),
     tags$script(src = chakra),
     if (is.character(before)) if (self_contained) {
       tags$script(HTML(file_content(before)))
@@ -100,7 +109,7 @@ moon_reader = function(
     },
     tags$script(HTML(paste(c(sprintf(
       'var slideshow = remark.create(%s);', if (length(nature)) xfun::tojson(nature) else ''
-    ), pkg_file('js/show-widgets.js'), pkg_file('js/print-css.js'),
+    ), pkg_file(c('js/show-widgets.js', 'js/print-css.js', 'js/after.js')),
     play_js, countdown_js), collapse = '\n')))
   )), tmp_js)
 
@@ -114,35 +123,44 @@ moon_reader = function(
       stop("mathjax = 'local' does not work for moon_reader()")
     if (!is.null(mathjax)) {
       if (identical(mathjax, 'default')) {
-        mathjax = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML'
+        mathjax = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML'
       }
       pandoc_args = c(pandoc_args, '-V', paste0('mathjax-url=', mathjax))
       mathjax = NULL
     }
+    pandoc_args = c(pandoc_args, '-V', paste0('title-slide-class=', title_cls))
     rmarkdown::html_document(
       ..., includes = includes, mathjax = mathjax, pandoc_args = pandoc_args
     )
   }
 
   optk = list()
-  hook_highlight = if (isTRUE(nature$highlightLines)) {
-    # an ugly way to access the `source` hook of markdown output in knitr
-    hook_source = local({
+
+  highlight_hooks = NULL
+  if (isTRUE(nature$highlightLines)) {
+    # an ugly way to access hooks of markdown output in knitr
+    hooks = local({
       ohooks = knitr::knit_hooks$get(); on.exit(knitr::knit_hooks$restore(ohooks))
       knitr::render_markdown()
-      knitr::knit_hooks$get('source')
+      knitr::knit_hooks$get(c('source', 'output'))
     })
-
-    function(x, options) {
-      res = hook_source(x, options)
-      highlight_code(res)
-    }
+    highlight_hooks = list(
+      source = function(x, options) {
+        hook = hooks[['source']]
+        res = hook(x, options)
+        highlight_code(res)
+      },
+      output = function(x, options) {
+        hook = hooks[['output']]
+        res = highlight_output(x, options)
+        hook(res, options)
+      }
+    )
   }
 
+
   rmarkdown::output_format(
-    if (!is.null(hook_highlight)) {
-      rmarkdown::knitr_options(knit_hooks = list(source = hook_highlight))
-    },
+    rmarkdown::knitr_options(knit_hooks = highlight_hooks),
     NULL, clean_supporting = self_contained,
     pre_knit = function(...) {
       optk <<- knitr::opts_knit$get()
@@ -200,16 +218,10 @@ infinite_moon_reader = function(moon, cast_from = '.') {
   # when this function is called via the RStudio addin, use the dir of the
   # current active document
   if (missing(moon) && requireNamespace('rstudioapi', quietly = TRUE)) {
-    context_fun = tryCatch(
-      getFromNamespace('getSourceEditorContext', 'rstudioapi'),
-      error = function(e) rstudioapi::getActiveDocumentContext
-    )
-    moon = context_fun()[['path']]
-    if (is.null(moon)) stop('Cannot find the current active document in RStudio')
-    if (moon == '') stop(
-      'Please click the RStudio source editor first, or save the current document'
-    )
-    if (!grepl('[.]R?md', moon, ignore.case = TRUE)) stop(
+    moon = rstudioapi::getSourceEditorContext()[['path']]
+    if (is.null(moon)) stop('Cannot find an open document in the RStudio editor')
+    if (moon == '') stop('Please save the current document')
+    if (!grepl('[.]R?md$', moon, ignore.case = TRUE)) stop(
       'The current active document must be an R Markdown document. I saw "',
       basename(moon), '".'
     )
@@ -218,19 +230,55 @@ infinite_moon_reader = function(moon, cast_from = '.') {
   rebuild = function() {
     rmarkdown::render(moon, envir = globalenv(), encoding = 'UTF-8')
   }
+  html = NULL
+  # rebuild if moon or any dependencies (CSS/JS/images) have been updated
   build = local({
-    mtime = function() file.info(moon)[, 'mtime']
-    time1 = mtime()
-    function(...) {
-      time2 = mtime()
-      if (identical(time1, time2)) return(FALSE)
-      # moon has been changed, recompile it and reload in browser
-      rebuild()
-      time1 <<- time2
+    # if Rmd is inside a package, listen to changes under the inst/ dir,
+    # otherwise watch files under the dir of the moon
+    d = if (p <- is_package()) 'inst' else dirname(moon)
+    files = if (getOption('xaringan.inf_mr.aggressive', TRUE)) function() {
+      c(list.files(
+        d, '[.](css|js|png|gif|jpeg)$', full.names = TRUE, recursive = TRUE
+      ), moon)
+    } else function() moon
+    mtime = function() file.info(files())[, 'mtime']
+    html <<- normalize_path(rebuild())  # render Rmd initially
+    l = max(m <- mtime())  # record the latest timestamp of files
+    r = servr:::is_rstudio(); info = if (r) slide_context()
+    function(message) {
+      m2 = mtime(); u = !any(m2 > l)
+      # when running inside RStudio and only Rmd is possibly changed
+      if (u) {
+        if (!r || missing(message)) return(FALSE)
+        ctx = rstudioapi::getSourceEditorContext()
+        if (identical(normalize_path(as.character(ctx[['path']])), moon)) {
+          if (isTRUE(message[['focused']])) {
+            # auto-navigate to the slide source corresponding to current HTML
+            # page only when the slides are on focus
+            slide_navigate(ctx, message, moon)
+          } else {
+            # navigate to HTML page and update it incrementally if necessary
+            info2 = slide_context(ctx)
+            # incremental update only if the total number of pages (N) matches
+            if (!is.null(info2) && identical(message$N, info2$N)) {
+              on.exit(info <<- info2, add = TRUE)
+              return(list(page = info2$n, markdown = if (
+                identical(info$c, info2$c) || is.null(info2$c) || !identical(info$n, info2$n)
+              ) FALSE else process_slide(info2$c)))
+            }
+          }
+        }
+        return(FALSE)
+      }
+      l <<- max(m2)
+      # moon or dependencies have been updated, recompile and reload in browser
+      if (p || tail(m2, 1) > tail(m, 1)) {
+        rebuild(); if (r) info <<- slide_context()
+      }
+      l <<- max(m <<- mtime())
       TRUE
     }
   })
-  html = normalize_path(rebuild())  # render slides initially
   d = normalize_path(cast_from)
   f = rmarkdown::relative_to(d, html)
   # see if the html output file is under the dir cast_from
@@ -242,9 +290,54 @@ infinite_moon_reader = function(moon, cast_from = '.') {
       "the HTML output is not under this directory. Using '", d, "' instead."
     )
   }
-  servr:::dynamic_site(d, initpath = f, build = build)
+  servr:::dynamic_site(
+    d, initpath = f, build = build, ws_handler = pkg_resource('js', 'ws-handler.js')
+  )
 }
 
 #' @export
 #' @rdname inf_mr
 inf_mr = infinite_moon_reader
+
+
+#' Convert HTML presentations to PDF via DeckTape
+#'
+#' This function can use either the \command{decktape} command or the hosted
+#' docker image of the \pkg{decktape} library to convert HTML slides to PDF
+#' (including slides produced by \pkg{xaringan}).
+#' @param file The path to the HTML presentation file. When \code{docker =
+#'   FALSE}, this path could be a URL to online slides.
+#' @param output The desired output path of the PDF file.
+#' @param args Command-line arguments to be passed to \code{decktape}.
+#' @param docker Whether to use Docker (\code{TRUE}) or use the
+#'   \command{decktape} command directly (\code{FALSE}). By default, if
+#'   \pkg{decktape} has been installed in your system and can be found via
+#'   \code{Sys.which('decktape')}, it will be uesd directly.
+#' @param version The \pkg{decktape} version when you use Docker.
+#' @param open Whether to open the resulting PDF with your system PDF viewer.
+#' @note For some operating systems you may need to
+#'   \href{https://stackoverflow.com/questions/48957195}{add yourself to the
+#'   \command{docker} group} and restart your machine if you use DeckTape via
+#'   Docker. By default, the latest version of the \pkg{decktape} Docker image
+#'   is used. In case of errors, you may want to try older versions (e.g.,
+#'   \code{version = '2.8.0'}).
+#' @references DeckTape: \url{https://github.com/astefanutti/decktape}. Docker:
+#'   \url{https://www.docker.com}.
+#' @return The output file path (invisibly).
+#' @export
+#' @examples if (interactive()) {
+#'   xaringan::decktape('https://slides.yihui.name/xaringan', 'xaringan.pdf', docker = FALSE)
+#' }
+decktape = function(
+  file, output, args = '--chrome-arg=--allow-file-access-from-files',
+  docker = Sys.which('decktape') == '', version = '', open = FALSE
+) {
+  args = shQuote(c(args, file, output))
+  res = if (docker) system2('docker', c(
+    'run', '--rm', '-t', '-v', '`pwd`:/slides', '-v', '$HOME:$HOME',
+    paste0('astefanutti/decktape', if (version != '') ':', version), args
+  )) else system2('decktape', args)
+  if (res != 0) stop('Failed to convert ', file, ' to PDF')
+  if (open) open_file(output)
+  invisible(output)
+}

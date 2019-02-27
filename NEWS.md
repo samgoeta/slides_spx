@@ -1,6 +1,42 @@
+# CHANGES IN xaringan VERSION 0.9
+
+## NEW FEATURES
+
+- The Infinite Moon Reader (`xaringan::inf_mr()`) has been significantly enhanced for a much smoother user experience of authoring slides with the `xaringan::moon_reader` format in RStudio. The preview of the current slide will be instant (as you type in the RStudio editor), and the navigation in the source editor will be linked to the navigation of slides output. See https://yihui.name/en/2019/02/ultimate-inf-mr/ for details.
+
+- When printing slides to PDF, only the last slide of a series of incremental slides will be printed (thanks, @sebpardo @@benjie, #192).
+
+- Added a function `decktape()` to export slides to PDF via the DeckTape library (thanks, @pat-s, #177).
+
+- Added a CSS theme `uol` (University of Leicester) (thanks, @ellessenne, #183).
+
+- Added a CSS theme `fc` (thanks, @Yue-Jiang, #189).
+
+- `xaringan::inf_mr()` can detect changes in CSS/JS and common images now. When any of these files are changed, it will rebuild the Rmd document and reload the output in the browser (thanks, @mrchypark @tcgriffith, #185).
+
+- External links (URLs starting with `http://` or `https://`) on slides will be opened in new browser tabs/windows.
+
+## BUG FIXES
+
+- Fixed several long-lasting issues related to MathJax fonts and printing to PDF (#62, #73, #143, #148, #168).
+
+# CHANGES IN xaringan VERSION 0.8
+
+## NEW FEATURES
+
+- Added output highlighting using the chunk option `highlight.output` (thanks, @malcolmbarrett, #175).
+
+- Added a CSS theme `chocolate`. See [here](https://liao961120.github.io/slides/xaringan/) for an example slide (thanks, @liao961120, #171).
+
+- Added a set of CSS theme `kunoichi`, `shinobi` and `ninjutsu` - see [here for example](https://emitanaka.github.io/ninja-theme) (thanks, @emitanaka, #165).
+
+- Added a CSS theme `lucy` (thanks, @LucyMcGowan, #163).
+
 # CHANGES IN xaringan VERSION 0.7
 
 ## NEW FEATURES
+
+- Added a CSS theme `middlebury` (Middlebury College) (thanks, @jvcasillas, #150).
 
 - Added a CSS theme `tamu` (Texas A&M) (thanks, @nanhung, #115).
 
@@ -8,15 +44,21 @@
 
 - Added a CSS theme `uo` (University of Oregon) (#125).
 
-- Added a CSS theme `roboto` (Inspired by the Roboto Google font) (#126).
+- Added a CSS theme `robot` (inspired by the Roboto Google font) (#126).
 
 - Added a CSS theme `duke-blue` and corresponding `hygge-duke` (Duke University) (thanks, @libjohn, #133).
 
 - In the `metropolis` theme, updated weights and margins of all headers, and added a new CSS class `clear` that disables the colored box at the top of each slide (#107).
 
+- It is possible to customize the CSS classes of the title slide using the option `titleSlideClass` under the `nature` option of `xaringan::moon_reader()` now (thanks, @gadenbuie, #139, #136).
+
 ## BUG FIXES
 
 - An informative error message is now returned when trying to use an invalid or misspelled CSS theme name (thanks, @gadenbuie, #129).
+
+- LaTeX math expressions will no longer be rendered inside the `<code></code>` tags (thanks, @garthtarr, #137).
+
+- The default CSS style for tables should not be applied to the help page of the slides (thanks, @KevCaz, #138).
 
 # CHANGES IN xaringan VERSION 0.6
 
