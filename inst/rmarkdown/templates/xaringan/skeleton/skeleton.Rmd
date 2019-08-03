@@ -11,6 +11,7 @@ output:
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
+      beforeInit: "macros.js"
 params:
   event: la grosse conférence
   slug: lagrosseconf
@@ -43,7 +44,7 @@ Les productions de Datactivist sont librement réutilisables selon les termes de
 ## Qui sommes nous ?
 
 
-[![](https://github.com/datactivist/slides_datactivist/raw/master/inst/rmarkdown/templates/xaringan/resources/img/logo.png)](https://datactivist.coop)
+[![:scale 80%](https://github.com/datactivist/slides_datactivist/raw/master/inst/rmarkdown/templates/xaringan/resources/img/logo.png)](https://datactivist.coop)
 
 ### We .red[open data], we make them .red[useful]
 
