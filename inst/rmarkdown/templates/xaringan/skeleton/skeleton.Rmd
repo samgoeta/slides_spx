@@ -44,7 +44,7 @@ Les productions de Datactivist sont librement réutilisables selon les termes de
 ## Qui sommes nous ?
 
 
-[![:scale 80%](https://github.com/datactivist/slides_datactivist/raw/master/inst/rmarkdown/templates/xaringan/resources/img/logo.png)](https://datactivist.coop)
+.center[[![:largeur 80%](https://github.com/datactivist/slides_datactivist/raw/master/inst/rmarkdown/templates/xaringan/resources/img/logo.png)](https://datactivist.coop)]
 
 ### We .red[open data], we make them .red[useful]
 
@@ -102,7 +102,7 @@ Mais c'est difficile : demande peu visible, pas de possibilité de soumettre la 
 
 ???
 
-La collectivité est toujours la première réutilisatrice de ses propres données
+La collectivité est toujours la première réutilisatrice de ses propres données.
 
 ---
 ## Réussir sa stratégie d'ouverture des données 
