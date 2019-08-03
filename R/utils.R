@@ -96,10 +96,10 @@ summon_remark = function(version = 'latest', to = 'libs/') {
 # this also works with multiple lines
 highlight_code = function(x) {
   x = paste0('\n', x)  # prepend \n and remove it later
-  r = '(\n)([ \t]*)\\{\\{(.+?)\\}\\}'
-  m = gregexpr(r, x)
+  r = '(\n)([ \t]*)\\{\\{(.+?)\\}\\}(?=(\n|$))'
+  m = gregexpr(r, x, perl = TRUE)
   regmatches(x, m) = lapply(regmatches(x, m), function(z) {
-    z = gsub(r, '\\1\\2\\3', z)  # remove {{ and }}
+    z = gsub(r, '\\1\\2\\3', z, perl = TRUE)  # remove {{ and }}
     z = gsub('\n', '\n*', z)     # add * after every \n
     z
   })
@@ -150,6 +150,17 @@ slide_context = function(ctx = rstudioapi::getSourceEditorContext()) {
   l = ctx$selection[[1]]$range$end[1]  # line number of cursor
   i = prose_index(x, warn = FALSE); x2 = x; if (length(i)) x2[-i] = ''
   s = grep('^---?$', x2)  # line numbers of slide separators; first two are YAML
+
+  # remove hidden slides from the source
+  k = unlist(lapply(grep(reg_hidden, x2), function(i) {
+    i1 = tail(s[s < i], 1); if (length(i1) == 0) i1 = 1
+    i2 = head(s[s > i], 1); if (length(i2) == 0) i2 = length(x)
+    (i1 + 1):i2
+  }))
+  if (length(k)) {
+    x[k] = ''; x2[k] = ''; s = grep('^---?$', x2)
+  }
+
   i = which(x2 == '---')
   n = max(sum(s <= l), 1)
   i1 = tail(i[i <= l], 1); if (length(i1) == 0) i1 = 1
@@ -163,13 +174,18 @@ slide_context = function(ctx = rstudioapi::getSourceEditorContext()) {
   )
 }
 
-slide_navigate = function(ctx = rstudioapi::getSourceEditorContext(), message, target) {
+reg_hidden = '^(layout|exclude): true\\s*$'
+
+slide_navigate = function(ctx = rstudioapi::getSourceEditorContext(), message) {
   if (!is.list(message) || !is.numeric(p <- message$n)) return()
   sel = ctx$selection[[1]]
   if (sel$text != '') return()  # when user has selected some text, don't navigate
   l = sel$range$end[1]; x = ctx$contents
   i = prose_index(x, warn = FALSE); x2 = x; if (length(i)) x2[-i] = ''
   s = grep('^---?$', x2); o = getOption('xaringan.page_number.offset', 0L)
+  k = unlist(lapply(grep(reg_hidden, x2), function(i) sum(s < i)))
+  k = unique(k[k > 0])
+  if (length(k)) s = s[-k]
   if (length(s) + o != message$N) return()
   n = max(sum(s <= l), 1); p = p - o
   # don't move cursor if already on the current page

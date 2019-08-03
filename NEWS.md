@@ -1,3 +1,23 @@
+# CHANGES IN xaringan VERSION 0.12
+
+
+
+# CHANGES IN xaringan VERSION 0.11
+
+## BUG FIXES
+
+- `{{ }}` in source code could incorrectly highlight a line when `}}` is not at the end of a line (thanks, @filipwastberg, #215).
+
+# CHANGES IN xaringan VERSION 0.10
+
+## NEW FEATURES
+
+- Added the ability to specify an `institute` in the YAML header that is automatically added to the title slide (@paullemmens, #200).
+
+## BUG FIXES
+
+- The Infinite Moon Reader (`xaringan::inf_mr()`) didn't take slide properties `layout: true` and `exclude: true` into consideration (thanks, @fmmattioni, #198).
+
 # CHANGES IN xaringan VERSION 0.9
 
 ## NEW FEATURES

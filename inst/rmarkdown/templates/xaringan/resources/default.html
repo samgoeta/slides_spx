@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="$lang$" xml:lang="$lang$"$if(dir)$ dir="$dir$"$endif$>
   <head>
     <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
 $for(author-meta)$
     <meta name="author" content="$author-meta$" />
 $endfor$
@@ -32,6 +32,11 @@ $endif$
 $for(author)$
 ### $author$
 $endfor$
+$if(institute)$
+$for(institute)$
+### $institute$
+$endfor$
+$endif$
 $if(date)$
 ### $date$
 $endif$
