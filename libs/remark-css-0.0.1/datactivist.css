@@ -1,10 +1,10 @@
-
+/* Couleur de fond d'une slide standard */
 .remark-slide-content {
-  background-color: #fff1eb;
+  background-color: #FFFFFF;
 }
-
+/* Couleur de la typo d'une slide standard */
 a, a > code {
-  color: #e95459;
+  color: #E6142D;
   text-decoration: none;
 }
 .footnote {
@@ -14,14 +14,14 @@ a, a > code {
   font-size: 90%;
 }
 .remark-code-line-highlighted     { background-color: #ffff88; }
-
+/* Couleur de fond et de la typo d'une slide séparatrice */
 .inverse {
-  background-color: #173541;
-  color: #fff1eb;
+  background-color: #E6142D;
+  color: #FFFFFF;
   text-shadow: 0 0 20px #333;
 }
 .inverse h1, .inverse h2, .inverse h3 {
-  color: #fff1eb;
+  color: #FFFFFF;
   line-height: 1.0em;
 }
 /* Two-column layout */
@@ -51,10 +51,10 @@ a, a > code {
   clear: both;
 }
 img {
-  max-width: 100%;
+  max-width: 95%;
 }
 .reduite img {
-  max-height: 500px;
+  max-height: 400px;
 }
 .mini img {
   max-height: 50px;
@@ -64,13 +64,13 @@ blockquote {
   padding-left: 1em;
 }
 .red {
-  color: #e95459;
+  color: #E6142D;
 }
 
 .title-slide {
   background-size: cover;
   background-position: 50% 50%;
-  background-color: #fff1eb;
+  background-color: #ffffff;
 }
 
 .title-slide .remark-slide-number {
@@ -78,17 +78,17 @@ blockquote {
 }
 .title-slide h1, .title-slide h2, .title-slide h3 {
   text-shadow: 0 0 20px #fff;
-  color: #173541;
+  color: #E6142D;
 }
 .title-slide h1 {
-  color: #e95459;
+  color: #ffffff;
 }
 .pictos img {
   background-color: #000000;
 }
 
 div.my-header {
-    background-color: #173541;
+    background-color: #E6142D;
     background: -webkit-gradient(linear, left top, right top, color-stop(0%,#ffb76b), color-stop(0%,#ffa73d), color-stop(0%,#ffffff), color-stop(10%,#ffffff), color-stop(25%,#173541), color-stop(100%,#173541));
     position: fixed;
     top: 0px;
@@ -99,7 +99,7 @@ div.my-header {
 }
 
 div.my-footer {
-    background-color: #173541;
+    background-color: #E6142D;
     position: absolute;
     bottom: 0px;
     left: 0px;
@@ -108,7 +108,7 @@ div.my-footer {
 }
 div.my-footer span {
     font-size: 10pt;
-    color: #F7F8FA;
+    color: #FFFFFF;
     position: absolute;
     left: 15px;
     bottom: 5px;

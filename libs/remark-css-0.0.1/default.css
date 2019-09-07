@@ -45,7 +45,7 @@ a, a > code {
   clear: both;
 }
 img, video, iframe {
-  max-width: 100%;
+  max-width: 95%;
 }
 blockquote {
   border-left: solid 5px lightgray;
